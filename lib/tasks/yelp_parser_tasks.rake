@@ -26,6 +26,8 @@ namespace :yelp do
           puts highlight_dish.inspect
           highlight_dish.save
         end
+        r.highlight_parsed = true
+        r.save
       end
     end
   end
