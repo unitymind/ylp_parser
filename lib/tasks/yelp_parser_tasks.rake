@@ -4,7 +4,7 @@ namespace :yelp do
     task :highlights => :environment  do
       count = Yelp::Restaurant.where(:highlight_parsed => false).count
       current = 0
-      Yelp::Restaurant.where(:highlight_parsed => false).find_each do |r|
+      Yelp::Restaurant.where(:highlight_parsed => false).find_each(:start => ENV['START']) do |r|
         current += 1
         puts "#{r.ylp_uri} - #{current} of #{count}"
         begin
