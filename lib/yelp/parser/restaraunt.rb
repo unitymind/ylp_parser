@@ -32,7 +32,7 @@ module Yelp::Parser
         data[:quote].strip!
         data[:quote].gsub!(/^"/, '')
         data[:quote].gsub!(/"$/, '')
-        data[:reviews_count] = snippet.css('span.secondary').text.strip.match(/In\s(\d+)\sreviews/)[1].to_i
+        data[:reviews_count] = snippet.css('span.secondary').text.strip.match(/In\s(\d+)\sreview(s?)/)[1].to_i
         result << Yelp::Parser::Highlight.new(data)
       end
       result

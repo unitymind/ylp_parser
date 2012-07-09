@@ -30,14 +30,14 @@ namespace :yelp do
           end
           restaurant.highlight_parsed = true
           restaurant.save
-        rescue Yelp::Parser::Errors::HttpError, Errno::ETIMEDOUT => ex
+        rescue Yelp::Parser::Errors::HttpError => ex
           puts "Network HttpError: #{ex.message}"
           puts "Stop parsing!"
           exit(1)
         rescue Exception => ex
           puts "FAILED!"
           puts ex.inspect
-          #raise save
+          #raise ex
           #ignored
         end
       end
