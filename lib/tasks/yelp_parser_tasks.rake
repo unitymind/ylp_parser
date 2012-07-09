@@ -4,7 +4,7 @@ namespace :yelp do
     task :highlights => :environment  do
       count = Yelp::Restaurant.where(:highlight_parsed => false).count
       current = 0
-      Yelp::Restaurant.where(:highlight_parsed => false).find_each(:start => ENV['START']) do |r|
+      Yelp::Restaurant.where(:highlight_parsed => false).find_each(:start => ENV['START'], :batch_size => 100) do |r|
         current += 1
         puts "#{r.ylp_uri} - #{current} of #{count}"
         begin
@@ -32,6 +32,17 @@ namespace :yelp do
         rescue
           puts 'FAILED!'
           #ignored
+        end
+      end
+    end
+
+    namespace :highlights do
+      desc "Fix highlight_parsed in restaurants"
+      task :fix_parsed => :environment do
+        Yelp::HighlightDish.select("id, restaraunt_id").group("restaraunt_id").find_each do |h|
+          h.restaurant.highlight_parsed = true
+          h.restaurant.save
+          puts "#{h.restaurant.ylp_uri} fixed!"
         end
       end
     end
