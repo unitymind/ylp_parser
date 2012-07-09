@@ -1,17 +1,18 @@
 namespace :yelp do
   namespace :parser do
     desc "Parse Highlights "
-    task :highlights => :environment  do
+    task :highlights => :environment do
+      Yelp::Parser.proxy = ENV['PROXY'] if ENV['PROXY']
       count = Yelp::Restaurant.where(:highlight_parsed => false).count
       current = 0
-      Yelp::Restaurant.where(:highlight_parsed => false).find_each(:start => ENV['START'], :batch_size => 100) do |r|
+      Yelp::Restaurant.where(:highlight_parsed => false).find_each(:start => ENV['START'] || 1, :batch_size => 100) do |restaurant|
         current += 1
-        puts "#{r.ylp_uri} - #{current} of #{count}"
+        puts "#{restaurant.ylp_uri} - #{current} of #{count}"
         begin
-          page = Yelp::Parser::Restaurant.new(r.ylp_uri)
+          page = Yelp::Parser::Restaurant.new(restaurant.ylp_uri)
           photos = Yelp::Parser::DishPhotos.new(page.biz_id)
           page.highlights.each do |h|
-            highlight_dish = r.highlight_dishes.where(:sentence_review_id => h.data[:sentence_review_id]).first || r.highlight_dishes.new(:sentence_review_id => h.data[:sentence_review_id])
+            highlight_dish = restaurant.highlight_dishes.where(:sentence_review_id => h.data[:sentence_review_id]).first || restaurant.highlight_dishes.new(:sentence_review_id => h.data[:sentence_review_id])
 
             highlight_dish.biz_id = page.biz_id
             highlight_dish.quote = h.data[:quote]
@@ -27,10 +28,16 @@ namespace :yelp do
             puts highlight_dish.inspect
             highlight_dish.save
           end
-          r.highlight_parsed = true
-          r.save
-        rescue
-          puts 'FAILED!'
+          restaurant.highlight_parsed = true
+          restaurant.save
+        rescue Yelp::Parser::Errors::HttpError => ex
+          puts "HttpError: #{ex.message}"
+          puts "Stop parsing!"
+          exit(1)
+        rescue Exception => ex
+          puts "FAILED!"
+          puts ex.inspect
+          #raise save
           #ignored
         end
       end

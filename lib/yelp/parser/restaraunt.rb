@@ -8,7 +8,9 @@ module Yelp::Parser
     attr_reader :biz_id
 
     def initialize(yelp_uri)
+      super()
       @response = self.class.get(yelp_uri)
+      check_response
       @biz_id = biz_id
     end
 
@@ -37,6 +39,7 @@ module Yelp::Parser
     end
 
     def biz_id
+      #puts @response.parsed_response.inspect
       @response.parsed_response.css('div#bizOwner').css('a')[0].attributes['href'].value.match(/biz_id=(.+)$/)[1]
     end
 

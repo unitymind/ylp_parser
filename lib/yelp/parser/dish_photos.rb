@@ -8,7 +8,9 @@ module Yelp::Parser
     attr_reader :pages
 
     def initialize(biz_id)
+      super()
       @response = self.class.get("/biz_photos/#{biz_id}")
+      check_response
       @pages = Array.new << @response
       fetch_pages
     end

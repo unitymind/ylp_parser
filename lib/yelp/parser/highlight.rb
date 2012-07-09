@@ -7,6 +7,7 @@ module Yelp::Parser
     parser Yelp::Parser::Xml
 
     def initialize(data)
+      super()
       @data = data
       @response = self.class.get('/biz_details/snapshot_reviews',
                                  :query => {
@@ -14,6 +15,7 @@ module Yelp::Parser
                                      :ngram => @data[:dish_name],
                                      :sentence_review_id => @data[:sentence_review_id]
                                  })
+      check_response
     end
 
     def profile
