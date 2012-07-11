@@ -5,7 +5,7 @@ namespace :yelp do
       Yelp::Parser.proxy = ENV['PROXY'] if ENV['PROXY']
       count = Yelp::Restaurant.where(:highlight_parsed => false).count
       current = 0
-      Yelp::Restaurant.where(:highlight_parsed => false).find_each(:start => ENV['START'] || 1, :batch_size => 100) do |restaurant|
+      Yelp::Restaurant.highlights_not_parsed.find_each(:start => ENV['START'] || 1, :batch_size => 100) do |restaurant|
         current += 1
         puts "#{restaurant.ylp_uri} - #{current} of #{count}"
         begin
@@ -34,22 +34,13 @@ namespace :yelp do
           puts "Network HttpError: #{ex.message}"
           puts "Stop parsing!"
           exit(1)
+        rescue Errno::ETIMEDOUT, Timeout::Error, Errno::ECONNREFUSED, ActiveRecord::RecordNotUnique => ex
+          puts "FAILED!"
+          puts ex.inspect
         rescue Exception => ex
           puts "FAILED!"
           puts ex.inspect
-          #raise ex
-          #ignored
-        end
-      end
-    end
-
-    namespace :highlights do
-      desc "Fix highlight_parsed in restaurants"
-      task :fix_parsed => :environment do
-        Yelp::HighlightDish.select("id, restaraunt_id").group("restaraunt_id").find_each do |h|
-          h.restaurant.highlight_parsed = true
-          h.restaurant.save
-          puts "#{h.restaurant.ylp_uri} fixed!"
+          raise ex
         end
       end
     end
