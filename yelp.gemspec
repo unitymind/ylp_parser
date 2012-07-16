@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.add_dependency "rails", "~> 3.2.6"
   s.add_dependency "httparty", "~> 0.8.3"
   s.add_dependency "nokogiri", "~> 1.5.5"
+  s.add_dependency "yajl-ruby", "~> 1.1.0"
   # s.add_dependency "jquery-rails"
 
   s.add_development_dependency "sqlite3"
